@@ -1,0 +1,348 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum MaritalType {
+  MARRIED
+  SINGLE
+}
+
+model Account {
+  id                   Int                   @id @default(autoincrement())
+  publicId             String
+  email                String                @unique
+  password             String
+  isActive             Boolean               @default(true) @map("is_active")
+  firstTimer           Boolean               @default(true) @map("first_timer")
+  roleName             String?               @default("follower") @map("role_name")
+  role                 Role                  @relation(fields: [roleId], references: [id])
+  roleId               Int                   @default(2)
+  department           String?
+  name                 String
+  nickname             String?
+  accountMethod        String                @default("FORM") @map("account_method")
+  phoneNumber          String?
+  dob                  String?
+  marital              MaritalType?          @default(SINGLE)
+  marriedAt            DateTime?             @map("married_at")
+  gender               String?
+  parishOrigin         String?               @map("parish_origin")
+  isInternal           Boolean               @default(false) @map("is_internal")
+  address              String?
+  province             String?
+  city                 String?
+  district             String?
+  urban                String?
+  zipCode              String?               @map("zip_code")
+  profile              String?
+  membershipNumber     String?
+  createdAt            DateTime              @default(now()) @map("created_at")
+  updatedAt            DateTime?             @map("updated_at")
+  deletedAt            DateTime?             @map("deleted_at")
+  events               EventFormRegister[]
+  tokens               AccountToken[]
+  accountNotifications AccountNotification[]
+  blogs                Blog[]
+
+  @@map("accounts")
+}
+
+model Role {
+  id          Int       @id @default(autoincrement())
+  name        String
+  permissions String    @db.Text
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime? @map("updated_at")
+  deletedAt   DateTime? @map("deleted_at")
+  Accounts    Account[]
+
+  @@map("roles")
+}
+
+model AccountToken {
+  id             Int     @id @default(autoincrement())
+  account        Account @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  accountId      Int     @map("account_id")
+  token          String
+  tokenType      String  @map("token_type")
+  notificationId String? @map("notification_id")
+
+  @@map("account_tokens")
+}
+
+model AccountNotification {
+  id        Int      @id @default(autoincrement())
+  account   Account? @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  accountId Int?     @map("account_id")
+  message   String?
+  title     String?
+  redirect  String?
+  read      Boolean  @default(false)
+
+  @@map("account_notifications")
+}
+
+model AccountPartner {
+  id          Int       @id @default(autoincrement())
+  husbandId   Int?      @map("husband_id")
+  wifeId      Int?      @map("wife_id")
+  husbandName String    @map("husband_name")
+  wifeName    String    @map("wife_name")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime? @map("updated_at")
+  deletedAt   DateTime? @map("deleted_at")
+
+  @@map("account_partners")
+}
+
+model PartnerKid {
+  id        Int                @id @default(autoincrement())
+  name      String
+  dob       DateTime?
+  gender    String?
+  profile   String?
+  createdAt DateTime           @default(now()) @map("created_at")
+  updatedAt DateTime?          @map("updated_at")
+  deletedAt DateTime?          @map("deleted_at")
+  events    EventKidRegister[]
+
+  @@map("partner_kids")
+}
+
+model MasterSetting {
+  id          Int     @id @default(autoincrement())
+  name        String?
+  group       String? // Bank Account
+  category    String? // QR / Bank Account
+  photo       String? // QR Photo
+  firstValue  String? @map("first_value") // Bank Name
+  secondValue String? @map("second_value") // Bank Account Name
+  thirdValue  String? @map("third_value") // Bank Account Number
+  fourthValue String? @map("fourth_value")
+
+  @@map("master_settings")
+}
+
+model ListOfValue {
+  id          Int       @id @default(autoincrement())
+  name        String
+  firstValue  String    @map("first_value") @db.Text
+  secondValue String?   @map("second_value") @db.Text
+  thirdValue  String?   @map("third_value") @db.Text
+  category    String
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime? @map("updated_at")
+  deletedAt   DateTime? @map("deleted_at")
+
+  @@map("list_of_values")
+}
+
+model Event {
+  id               Int                 @id @default(autoincrement())
+  publicId         String
+  slug             String
+  name             String
+  description      String?             @db.Text
+  horizontalBanner String?             @map("horizontal_banner")
+  verticalBanner   String?             @map("vertical_banner")
+  category         String?
+  location         Location?           @relation(fields: [locationId], references: [id])
+  locationId       Int?                @map("location")
+  locationName     String?             @map("location_name")
+  locationAddress  String?             @map("location_address")
+  startDate        String?             @map("start_date")
+  startTime        String?             @map("start_end")
+  endDate          String?             @map("end_date")
+  endTime          String?             @map("end_time")
+  openRegis        String?             @map("open_regis")
+  closeRegis       String?             @map("close_regis")
+  formFormat       String?             @map("form_format") @db.Text
+  formLink         String?             @map("form_link")
+  isInternal       Boolean             @default(false) @map("is_internal")
+  maxParticipant   Int                 @default(100) @map("max_participant")
+  createdAt        DateTime            @default(now()) @map("created_at")
+  updatedAt        DateTime?           @map("updated_at")
+  deletedAt        DateTime?           @map("deleted_at")
+  participant      EventFormRegister[]
+  pics             EventInCharge[]
+  speakers         EventSpeaker[]
+  kids             EventKidRegister[]
+
+  @@map("events")
+}
+
+model EventInCharge {
+  id        Int       @id @default(autoincrement())
+  event     Event     @relation(references: [id], fields: [eventId], onDelete: Cascade)
+  eventId   Int       @map("event_id")
+  name      String
+  phone     String?
+  photo     String?
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime? @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
+
+  @@map("events_in_charges")
+}
+
+model EventSpeaker {
+  id        Int       @id @default(autoincrement())
+  event     Event     @relation(references: [id], fields: [eventId], onDelete: Cascade)
+  eventId   Int       @map("event_id")
+  name      String
+  photo     String?
+  title     String?
+  origin    String?
+  role      String?
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime? @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
+
+  @@map("events_speakers")
+}
+
+model EventFormRegister {
+  id                      Int       @id @default(autoincrement())
+  member                  Account?  @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  memberId                Int?      @map("member_id")
+  event                   Event     @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  eventId                 Int       @map("event_id")
+  participantName         String    @map("participant_name")
+  participantDob          String?   @map("participant_dob")
+  participantGender       String?   @map("participant_gender")
+  participantParishOrigin String?   @map("participant_parish_origin")
+  attendance              DateTime?
+  createdAt               DateTime  @default(now()) @map("created_at")
+  updatedAt               DateTime? @map("updated_at")
+
+  @@map("events_form_registers")
+}
+
+model EventKidRegister {
+  id        Int        @id @default(autoincrement())
+  event     Event      @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  eventId   Int        @map("event_id")
+  child     PartnerKid @relation(references: [id], fields: [childId], onDelete: Cascade)
+  childId   Int        @map("child_id")
+  createdAt DateTime   @default(now()) @map("created_at")
+  updatedAt DateTime?  @map("updated_at")
+
+  @@map("events_kid_registers")
+}
+
+model Section {
+  id          Int       @id @default(autoincrement())
+  name        String
+  description String?   @db.Text
+  category    String // Tribe, etc.
+  picName     String?   @map("pic_name")
+  valueType   String?   @map("value_type") //LINK_WHATSAPP, LINK_FORM
+  value       String?
+  group       String?
+  photo       String?
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime? @map("updated_at")
+
+  @@map("sections")
+}
+
+model ProjectMedia {
+  id          Int       @id @default(autoincrement())
+  name        String
+  description String?   @db.Text
+  otherValue  String    @map("other_value") @db.Text
+  category    String
+  value       String?
+  banner      String?
+  publishedAt DateTime? @map("published_at")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime? @map("updated_at")
+
+  @@map("project_medias")
+}
+
+model Blog {
+  id             Int       @id @default(autoincrement())
+  name           String
+  category       String
+  description    String?   @db.Text
+  banner         String?
+  seoTitle       String    @map("seo_title")
+  seoDescription String?   @map("seo_description") @db.Text
+  seoKeywords    String?   @map("seo_keywords") @db.Text
+  author         Account?  @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  authorId       Int?      @map("author_id")
+  publishedAt    DateTime? @map("published_at")
+  createdAt      DateTime  @default(now()) @map("created_at")
+  updatedAt      DateTime? @map("updated_at")
+
+  @@map("blogs")
+}
+
+model Announcement {
+  id          Int       @id @default(autoincrement())
+  name        String
+  description String?   @db.Text
+  isInternal  Boolean   @default(true) @map("is_internal")
+  category    String
+  urlLink     String?   @map("url_link")
+  banner      String?
+  publishedAt DateTime? @map("published_at")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime? @map("updated_at")
+
+  @@map("announcements")
+}
+
+model Speaker {
+  id          Int       @id @default(autoincrement())
+  name        String
+  description String?   @db.Text
+  photo       String?
+  title       String?
+  origin      String?
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime? @map("updated_at")
+  deletedAt   DateTime? @map("deleted_at")
+
+  @@map("speakers")
+}
+
+model Location {
+  id          Int       @id @default(autoincrement())
+  name        String
+  description String?   @db.Text
+  latitude    String?
+  longitude   String?
+  address     String?
+  linkMap     String?   @map("link_map")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime? @map("updated_at")
+  deletedAt   DateTime? @map("deleted_at")
+  events      Event[]
+
+  @@map("locations")
+}
+
+model MediaFile {
+  id           Int       @id @default(autoincrement())
+  name         String
+  description  String?   @db.Text()
+  mimetype     String
+  category     String
+  locationFile String    @map("location_file")
+  size         String?
+  width        String?
+  height       String?
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime? @map("updated_at")
+  deletedAt    DateTime? @map("deleted_at")
+
+  @@index([id, name])
+  @@map("media_files")
+}
