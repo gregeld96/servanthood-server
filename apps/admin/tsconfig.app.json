@@ -1,0 +1,18 @@
+{
+    "extends": "../../tsconfig.json",
+    "compilerOptions": {
+        "outDir": "../../dist/apps/admin",
+        "rootDir": "../../", // 🔥 sekarang semua libs juga ikut
+        "tsBuildInfoFile": "../../dist/apps/admin/tsconfig.tsbuildinfo"
+    },
+    "include": [
+        "src/**/*.ts",
+        "../../types/**/*.d.ts"
+    ],
+    "exclude": [
+        "node_modules",
+        "dist",
+        "test",
+        "**/*spec.ts"
+    ]
+}

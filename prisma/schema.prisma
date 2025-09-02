@@ -19,6 +19,9 @@ model Account {
   password             String
   isActive             Boolean               @default(true) @map("is_active")
   firstTimer           Boolean               @default(true) @map("first_timer")
+  isJSOJ               Boolean               @default(false) @map("is_jsoj")
+  isJoinedWhatsApp     Boolean               @default(false) @map("is_joined_whats_app")
+  isOtherCommunity     Boolean               @default(false) @map("is_other_community")
   roleName             String?               @default("follower") @map("role_name")
   role                 Role                  @relation(fields: [roleId], references: [id])
   roleId               Int                   @default(2)
@@ -28,8 +31,8 @@ model Account {
   accountMethod        String                @default("FORM") @map("account_method")
   phoneNumber          String?
   dob                  String?
-  marital              MaritalType?          @default(SINGLE)
-  marriedAt            DateTime?             @map("married_at")
+  marital              String?               @default("SINGLE")
+  marriedAt            String?               @map("married_at")
   gender               String?
   parishOrigin         String?               @map("parish_origin")
   isInternal           Boolean               @default(false) @map("is_internal")
@@ -48,8 +51,25 @@ model Account {
   tokens               AccountToken[]
   accountNotifications AccountNotification[]
   blogs                Blog[]
+  medias               MediaFile[]
+  socialMedias         SocialMediaAccount[]
 
+  @@index([email, id, publicId])
   @@map("accounts")
+}
+
+model SocialMediaAccount {
+  id        Int       @id @default(autoincrement())
+  account   Account   @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  accountId Int       @map("account_id")
+  type      String
+  link      String?
+  username  String?
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime? @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
+
+  @@map("social_media_account")
 }
 
 model Role {
@@ -72,6 +92,7 @@ model AccountToken {
   tokenType      String  @map("token_type")
   notificationId String? @map("notification_id")
 
+  @@index([accountId])
   @@map("account_tokens")
 }
 
@@ -84,6 +105,7 @@ model AccountNotification {
   redirect  String?
   read      Boolean  @default(false)
 
+  @@index([accountId])
   @@map("account_notifications")
 }
 
@@ -91,12 +113,13 @@ model AccountPartner {
   id          Int       @id @default(autoincrement())
   husbandId   Int?      @map("husband_id")
   wifeId      Int?      @map("wife_id")
-  husbandName String    @map("husband_name")
-  wifeName    String    @map("wife_name")
+  husbandName String?   @map("husband_name")
+  wifeName    String?   @map("wife_name")
   createdAt   DateTime  @default(now()) @map("created_at")
   updatedAt   DateTime? @map("updated_at")
   deletedAt   DateTime? @map("deleted_at")
 
+  @@index([husbandId, wifeId])
   @@map("account_partners")
 }
 
@@ -125,6 +148,7 @@ model MasterSetting {
   thirdValue  String? @map("third_value") // Bank Account Number
   fourthValue String? @map("fourth_value")
 
+  @@index([category, group, id])
   @@map("master_settings")
 }
 
@@ -139,6 +163,7 @@ model ListOfValue {
   updatedAt   DateTime? @map("updated_at")
   deletedAt   DateTime? @map("deleted_at")
 
+  @@index([id, name])
   @@map("list_of_values")
 }
 
@@ -173,6 +198,7 @@ model Event {
   speakers         EventSpeaker[]
   kids             EventKidRegister[]
 
+  @@index([id, publicId, slug, name])
   @@map("events")
 }
 
@@ -194,6 +220,8 @@ model EventSpeaker {
   id        Int       @id @default(autoincrement())
   event     Event     @relation(references: [id], fields: [eventId], onDelete: Cascade)
   eventId   Int       @map("event_id")
+  speaker   Speaker?  @relation(references: [id], fields: [speakerId])
+  speakerId Int?      @map("speaker_id")
   name      String
   photo     String?
   title     String?
@@ -220,6 +248,7 @@ model EventFormRegister {
   createdAt               DateTime  @default(now()) @map("created_at")
   updatedAt               DateTime? @map("updated_at")
 
+  @@index([id, memberId, eventId])
   @@map("events_form_registers")
 }
 
@@ -248,6 +277,7 @@ model Section {
   createdAt   DateTime  @default(now()) @map("created_at")
   updatedAt   DateTime? @map("updated_at")
 
+  @@index([id, category])
   @@map("sections")
 }
 
@@ -263,6 +293,7 @@ model ProjectMedia {
   createdAt   DateTime  @default(now()) @map("created_at")
   updatedAt   DateTime? @map("updated_at")
 
+  @@index([id, category, name])
   @@map("project_medias")
 }
 
@@ -296,19 +327,21 @@ model Announcement {
   createdAt   DateTime  @default(now()) @map("created_at")
   updatedAt   DateTime? @map("updated_at")
 
+  @@index([id, name, category])
   @@map("announcements")
 }
 
 model Speaker {
-  id          Int       @id @default(autoincrement())
+  id          Int            @id @default(autoincrement())
   name        String
-  description String?   @db.Text
+  description String?        @db.Text
   photo       String?
   title       String?
   origin      String?
-  createdAt   DateTime  @default(now()) @map("created_at")
-  updatedAt   DateTime? @map("updated_at")
-  deletedAt   DateTime? @map("deleted_at")
+  createdAt   DateTime       @default(now()) @map("created_at")
+  updatedAt   DateTime?      @map("updated_at")
+  deletedAt   DateTime?      @map("deleted_at")
+  events      EventSpeaker[]
 
   @@map("speakers")
 }
@@ -339,10 +372,12 @@ model MediaFile {
   size         String?
   width        String?
   height       String?
+  user         Account   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId       Int       @map("userId")
   createdAt    DateTime  @default(now()) @map("created_at")
   updatedAt    DateTime? @map("updated_at")
   deletedAt    DateTime? @map("deleted_at")
 
-  @@index([id, name])
+  @@index([id, userId, name])
   @@map("media_files")
 }

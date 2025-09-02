@@ -15,6 +15,7 @@ const hashPassword = (inputPassword) => {
 const prisma = new PrismaClient();
 
 async function main() {
+    await prisma.accountPartner.deleteMany({});
     await prisma.account.deleteMany({});
     await prisma.role.deleteMany({});
 
@@ -69,18 +70,43 @@ async function main() {
         ]
     })
 
-    await prisma.account.create({
+    const res = await prisma.account.create({
         data: {
             publicId: v7(),
             name: 'Gregorius Eldwin Pradipta',
+            nickname: 'Greg',
             email: 'gregeld96@gmail.com',
             password: hashPassword("admin"),
             dob: '1996-09-08',
             department: 'Digital Ministry',
+            parishOrigin: 'Matias Rasul Kosambi',
+            firstTimer: false,
+            isJoinedWhatsApp: true,
+            isJSOJ: true,
+            accountMethod: 'system',
+            marital: 'MARRIED',
+            marriedAt: '2023-06-24',
             gender: "male",
             isInternal: true,
             roleName: "superadmin",
             roleId: 1,
+        },
+    });
+
+    await prisma.accountPartner.create({
+        data: {
+            husbandId: res.id,
+            husbandName: 'Gregorius Eldwin Pradipta',
+            wifeId: null,
+            wifeName: 'Veronika Dwi Kristanti',
+        },
+    });
+
+    await prisma.socialMediaAccount.create({
+        data: {
+            accountId: res.id,
+            type: 'Instagram',
+            username: 'gregoriuseldwin',
         },
     });
 }
