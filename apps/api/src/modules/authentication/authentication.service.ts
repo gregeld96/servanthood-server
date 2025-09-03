@@ -4,12 +4,14 @@ import { JwtService } from "@nestjs/jwt";
 import { v7 } from "uuid";
 import { checkPassword, hashPassword, ErrorName, prismaNotFound, prismaClientError, internalServerError } from "libs/common";
 import { CreateAccountDto, CredentialDto } from "./authentication.dto";
+import { ConfigService } from "@nestjs/config";
 
 @Injectable()
 export class AuthenticationService {
     constructor(
         private prisma: PrismaService,
         private jwtService: JwtService,
+        private config: ConfigService
     ) {}
 
     async login(payload: CredentialDto) {
@@ -66,12 +68,14 @@ export class AuthenticationService {
 
             const publicId = v7();
 
+            const saltRounds = this.config.get<number>('SALT_KEY', 10);
+
             const res = await this.prisma.account.create({
                 data: {
                     publicId: publicId,
                     email: payload.email,
                     name: payload.name,
-                    password: hashPassword(payload.password),
+                    password: hashPassword(payload.password, saltRounds),
                     nickname: payload.nickname,
                     dob: payload.dob,
                     gender: payload.gender,

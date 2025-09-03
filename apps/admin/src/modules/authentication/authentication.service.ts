@@ -3,12 +3,14 @@ import { JwtService } from "@nestjs/jwt";
 import { CredentialsDto } from "./dtos/authentication.schema";
 import { PrismaService } from "libs/database";
 import { checkPassword, ErrorName, internalServerError, prismaClientError, prismaNotFound } from "libs/common";
+import { ConfigService } from "@nestjs/config";
 
 @Injectable()
 export class AuthenticationService {
     constructor(
         private prisma: PrismaService,
         private jwtService: JwtService,
+        private config: ConfigService
     ) { }
 
     async login (request: CredentialsDto) {

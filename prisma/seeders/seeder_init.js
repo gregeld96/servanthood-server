@@ -8,6 +8,7 @@ const bcrypt = require('bcryptjs');
 require('dotenv').config();
 
 const hashPassword = (inputPassword) => {
+    console.log(process.env.SALT_KEY);
     var salt = bcrypt.genSaltSync(Number(process.env.SALT_KEY));
     return bcrypt.hashSync(inputPassword, salt);
 }

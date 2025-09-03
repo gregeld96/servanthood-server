@@ -1,7 +1,7 @@
 import { compareSync, genSaltSync, hashSync } from 'bcryptjs';
 
-export const hashPassword = (inputPassword: string) => {
-    var salt = genSaltSync(Number(process.env.SALT_KEY));
+export const hashPassword = (inputPassword: string, saltRound: number) => {
+    var salt = genSaltSync(saltRound);
     return hashSync(inputPassword, salt);
 }
 
