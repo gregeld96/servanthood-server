@@ -116,6 +116,8 @@ async function main() {
         },
     });
 
+    console.log(res);
+
     console.log(comparePassword(res.password, hashingPassword));
 }
 
