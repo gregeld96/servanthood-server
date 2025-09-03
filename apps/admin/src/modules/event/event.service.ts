@@ -2,7 +2,7 @@ import { Injectable } from "@nestjs/common";
 import { Prisma } from "@prisma/client";
 import { PrismaService } from "libs/database";
 import { v7 } from "uuid";
-import { FormEventType, GetEventListType } from "./dtos/event.type";
+import { FormEventType, GetEventListType, GetEventParticipantType } from "./dtos/event.type";
 import { ErrorName, internalServerError, prismaClientError, prismaNotFound } from "libs/common";
 import { formatToSlug, generatePagination } from "libs/common/src/utils/generate";
 
@@ -51,6 +51,9 @@ export class EventService {
                 orderBy: sortOption,
                 skip,
                 take,
+                include: {
+                    participant: true,
+                }
             });
 
             return {
@@ -97,11 +100,11 @@ export class EventService {
         }
     }
 
-    async getEventParticipant(publicId: string) {
+    async getEventParticipant(payload: GetEventParticipantType) {
         try {
             const detail = await this.prisma.event.findFirstOrThrow({
                 where: {
-                    publicId: publicId,
+                    publicId: payload.publicId,
                 },
                 select: {
                     id: true,
@@ -118,16 +121,48 @@ export class EventService {
                 }
             });
 
+            let whereOption: Prisma.EventFormRegisterWhereInput = {
+                eventId: detail.id,
+            }
+
+            if(payload.keyword) {
+                whereOption = {
+                    ...whereOption,
+                    OR: [
+                        payload.keyword
+                            ? { participantName: { contains: payload.keyword, mode: 'insensitive' } }
+                            : { },
+                        payload.keyword
+                            ? { member: { phoneNumber: { contains: payload.keyword, mode: 'insensitive' } } }
+                            : { },
+                    ],
+                }
+            }
+
+            const totalCount = await this.prisma.eventFormRegister.count({
+                where: whereOption,
+            });
+
+            const { take, skip, totalPage } = generatePagination(payload.page, payload.limit, totalCount);
+
+            const sortOption: Prisma.EventFormRegisterOrderByWithRelationInput = {}
+
+            if (payload.sortBy) {
+                const sort = payload.sortBy.startsWith('-') ? 'desc' : 'asc';
+                const sortField = (payload.sortBy.startsWith('-') ? payload.sortBy.substring(1) : payload.sortBy) as keyof Prisma.EventFormRegisterOrderByWithRelationInput;
+
+                sortOption[sortField] = sort;
+            }
+
             const participant = await this.prisma.eventFormRegister.findMany({
-                where: {
-                    eventId: detail.id,
-                },
+                where: whereOption,
                 select: {
                     id: true,
                     participantName: true,
                     participantDob: true,
                     participantGender: true,
                     participantParishOrigin: true,
+                    attendance: true,
                     createdAt: true,
                     member: {
                         select: {
@@ -140,15 +175,44 @@ export class EventService {
                         }
                     }
                 },
-                orderBy: {
-                    createdAt: 'desc',
-                }
+                orderBy: sortOption,
+                skip,
+                take,
             });
 
             return {
                 event: detail,
                 participant,
             };
+        } catch (error: any) {
+            switch (error.name) {
+                case ErrorName.PRISMA_NOT_FOUND:
+                    throw prismaNotFound();
+                case ErrorName.PRISMA_CLIENT_ERROR:
+                    throw prismaClientError(error);
+                default:
+                    throw internalServerError(error);
+            }
+        }
+    }
+
+    async participantCheckIn(id: number) {
+        try {
+            const exist = await this.prisma.eventFormRegister.findFirstOrThrow({
+                where: {
+                    id,
+                }
+            });
+
+            await this.prisma.eventFormRegister.update({
+                where: {
+                    id: exist.id,
+                },
+                data: {
+                    attendance: new Date(),
+                    updatedAt: new Date(),
+                }
+            });
         } catch (error: any) {
             switch (error.name) {
                 case ErrorName.PRISMA_NOT_FOUND:
@@ -302,7 +366,7 @@ export class EventService {
                 }
             });
 
-            if(eventSlugExist && (eventSlugExist?.publicId !== id)) throw ({code: 400, message: 'Event already exist'})
+            if (eventSlugExist && (eventSlugExist?.publicId !== id)) throw ({ code: 400, message: 'Event already exist' })
 
             const eventSpeakers = await this.prisma.eventSpeaker.findMany({
                 where: {
@@ -353,7 +417,7 @@ export class EventService {
                     }
                 });
 
-                await  tx.eventSpeaker.deleteMany({
+                await tx.eventSpeaker.deleteMany({
                     where: {
                         eventId: eventExist.id
                     }
@@ -394,7 +458,7 @@ export class EventService {
                     deletedAt: new Date(),
                 }
             });
-        } catch(error: any) {
+        } catch (error: any) {
             switch (error.name) {
                 case ErrorName.PRISMA_NOT_FOUND:
                     throw prismaNotFound();

@@ -345,6 +345,7 @@ CREATE TABLE "public"."media_files" (
     "width" TEXT,
     "height" TEXT,
     "userId" INTEGER NOT NULL,
+    "is_internal" BOOLEAN NOT NULL DEFAULT false,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3),
     "deleted_at" TIMESTAMP(3),

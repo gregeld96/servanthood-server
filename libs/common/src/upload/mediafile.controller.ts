@@ -4,7 +4,6 @@ import { MediaFileService } from './mediafile.service';
 import { File as MulterFile } from 'multer'; 
 import { v7 } from 'uuid';
 
-
 @Controller('/media-file')
 export class MediaFileController {
     constructor(private readonly mediaFileService: MediaFileService) {}
@@ -17,6 +16,12 @@ export class MediaFileController {
         @Body() body: any,
         @Req() req: any,
     ) {
-        return await this.mediaFileService.saveFile({ bucketName: body.category, file: file, objectName: `${v7()}-${file.originalname.replace(/ /g, '-')}`, userId: req.user?.userId });
+        return await this.mediaFileService.saveFile({ 
+            bucketName: body.category, 
+            file: file, 
+            objectName: `${v7()}-${file.originalname.replace(/ /g, '-')}`, 
+            userId: req.user?.userId, 
+            isInternal: body.isInternal, 
+        });
     }
 }

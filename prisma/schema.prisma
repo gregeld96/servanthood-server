@@ -374,6 +374,7 @@ model MediaFile {
   height       String?
   user         Account   @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId       Int       @map("userId")
+  isInternal   Boolean   @map("is_internal") @default(false)
   createdAt    DateTime  @default(now()) @map("created_at")
   updatedAt    DateTime? @map("updated_at")
   deletedAt    DateTime? @map("deleted_at")

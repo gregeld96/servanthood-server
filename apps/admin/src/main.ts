@@ -25,6 +25,9 @@ async function bootstrap() {
     type: VersioningType.URI, // adds /v1, /v2 automatically
     defaultVersion: '1',
   });
+  
+  // 🚫 disable ETag
+  app.getHttpAdapter().getInstance().disable('etag');
 
   app.setGlobalPrefix('admin');
 

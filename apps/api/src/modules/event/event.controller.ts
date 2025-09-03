@@ -17,16 +17,4 @@ export class EventController {
     async getSpecific(@Param() params: any) {
         return this.eventService.getEventSpecific(params.handle);
     }
-
-    @Post('join/:id')
-    @HttpCode(200)
-    async joinEvent(
-        @Req() req: any,
-        @Param() params: any,
-    ) {
-        return this.eventService.joinEvent({
-            ...req.user,
-            id: params.id,
-        });
-    }
 }

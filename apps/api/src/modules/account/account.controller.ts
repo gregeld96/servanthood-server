@@ -1,4 +1,4 @@
-import { Body, Controller, HttpCode, Put, Req, Get } from "@nestjs/common";
+import { Body, Controller, HttpCode, Put, Req, Get, Post, Param } from "@nestjs/common";
 import { AccountService } from "./account.service";
 
 
@@ -24,5 +24,17 @@ export class AccountController {
     @HttpCode(200)
     async register(@Req() req: any) {
         return this.accountService.getProfile(req.user.userId);
+    }
+
+    @Post('join/event/:id')
+    @HttpCode(200)
+    async joinEvent(
+        @Req() req: any,
+        @Param() params: any,
+    ) {
+        return this.accountService.joinEvent({
+            ...req.user,
+            id: params.id,
+        });
     }
 }

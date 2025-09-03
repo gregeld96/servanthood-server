@@ -11,7 +11,6 @@ import { AccountModule } from "./modules/account/account.module";
 import { AccountController } from "./modules/account/account.controller";
 import { MediaFileController } from "libs/common/src/upload/mediafile.controller";
 import { MediaFileModule } from "libs/common/src/upload/mediafile.module";
-import { EventController } from "./modules/event/event.controller";
 
 @Module({
     imports: [
@@ -58,18 +57,9 @@ export class AppModule implements NestModule {
                     }
                 ).use(req, res, next),
             )
-            .exclude(
-                {
-                    path: '/events', method: RequestMethod.GET
-                },
-                {
-                    path: '/events/:handle', method: RequestMethod.GET
-                }
-            )
             .forRoutes(
-                EventController,
                 AccountController,
                 MediaFileController,
-            )
+            );
     }
 }

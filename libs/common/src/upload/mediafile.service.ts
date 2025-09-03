@@ -19,7 +19,7 @@ export class MediaFileService {
         });
     }
 
-    async saveFile(payload: { bucketName: string, file: MulterFile, objectName: string, userId: number }): Promise<string> {
+    async saveFile(payload: { bucketName: string, file: MulterFile, objectName: string, userId: number, isInternal?: boolean, }): Promise<string> {
         const exists = await this.minioClient.bucketExists(payload.bucketName)
 
         if (!exists) {
@@ -67,6 +67,7 @@ export class MediaFileService {
                 mimetype: payload.file.mimetype,
                 size: payload.file.size.toString(),
                 userId: payload.userId,
+                isInternal: payload?.isInternal || false,
             }
         })
 

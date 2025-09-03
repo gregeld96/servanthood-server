@@ -31,5 +31,13 @@ export const EventFilterSchema = FilterSchema(
     startFrom: GenerateZodType.trimmedStringOptional('startFrom'),
     startTo: GenerateZodType.trimmedStringOptional('startTo'),
 })
-
 export class GetEventListDTO extends createZodDto(EventFilterSchema) { }
+
+export const EventParticipantFilterSchema = FilterSchema(
+    EventFilterSort,
+    EventFilterSort.CREATED_AT_DESC,
+).extend({
+    keyword: GenerateZodType.trimmedStringOptional('keyword'),
+    publicId: GenerateZodType.trimmedStringOptional('publicId'),
+})
+export class GetEventParticipantDTO extends createZodDto(EventParticipantFilterSchema) { }

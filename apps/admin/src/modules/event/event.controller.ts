@@ -1,6 +1,6 @@
 import { Controller, Get, UsePipes, HttpCode, Query, Post, Body, Put, Param, Delete } from "@nestjs/common";
 import { ZodValidationPipe } from "nestjs-zod";
-import { GetEventListDTO, FormEventDTO } from "./dtos/event.schema";
+import { GetEventListDTO, FormEventDTO, GetEventParticipantDTO } from "./dtos/event.schema";
 import { EventService } from "./event.service";
 
 @Controller('/events')
@@ -19,11 +19,13 @@ export class EventController {
     }
 
     @Get('participant/:publicId')
+    @UsePipes(new ZodValidationPipe(GetEventParticipantDTO))
     @HttpCode(200)
     async getParticipantDetail(
+        @Query() query: GetEventParticipantDTO,
         @Param() params: { publicId: string }
     ) {
-        return await this.eventService.getEventParticipant(params.publicId);
+        return await this.eventService.getEventParticipant({ ...query, publicId: params.publicId });
     }
 
     @Get(':publicId')
@@ -41,6 +43,14 @@ export class EventController {
         @Body() body: FormEventDTO,
     ) {
         return await this.eventService.create(body);
+    }
+
+    @Put('participant/:id')
+    @HttpCode(200)
+    async updateAttadanceParticipant(
+        @Param() params: { id: string }
+    ) {
+        return await this.eventService.participantCheckIn(Number(params.id));
     }
 
     @Put(':id')
