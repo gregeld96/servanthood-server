@@ -116,7 +116,7 @@ async function main() {
         },
     });
 
-    console.log(res, 'Pass DB:', res.password, res.password.length, 'Hash:', hashingPassword, hashingPassword.length);
+    console.log(res, 'Pass DB:', res.password, res.password.length, 'Hash:', hashingPassword, hashingPassword.length, 'Compare without package:', res.password === hashingPassword);
 
     console.log(comparePassword(res.password, hashingPassword));
 }
