@@ -8,9 +8,12 @@ const bcrypt = require('bcryptjs');
 require('dotenv').config();
 
 const hashPassword = (inputPassword) => {
-    console.log(process.env.SALT_KEY);
     var salt = bcrypt.genSaltSync(Number(process.env.SALT_KEY));
     return bcrypt.hashSync(inputPassword, salt);
+}
+
+const comparePassword = (inputPassword, hashingPass) => {
+    return bcrypt.compareSync(inputPassword, hashingPass);
 }
 
 const prisma = new PrismaClient();
@@ -69,7 +72,9 @@ async function main() {
             }
 
         ]
-    })
+    });
+
+    const hashingPassword = hashPassword("admin");
 
     const res = await prisma.account.create({
         data: {
@@ -77,7 +82,7 @@ async function main() {
             name: 'Gregorius Eldwin Pradipta',
             nickname: 'Greg',
             email: 'gregeld96@gmail.com',
-            password: hashPassword("admin"),
+            password: hashingPassword,
             dob: '1996-09-08',
             department: 'Digital Ministry',
             parishOrigin: 'Matias Rasul Kosambi',
@@ -110,6 +115,8 @@ async function main() {
             username: 'gregoriuseldwin',
         },
     });
+
+    console.log(comparePassword(res.password, hashingPassword));
 }
 
 main()
