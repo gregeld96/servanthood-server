@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { PrismaService } from 'libs/database';
 import { Client } from 'minio';
 import { File as MulterFile } from 'multer';
@@ -9,13 +10,14 @@ export class MediaFileService {
 
     constructor(
         private prisma: PrismaService,
+        private config: ConfigService
     ) {
         this.minioClient = new Client({
-            endPoint: process.env.MINIO_URL_HOST || '',
-            port: Number(process.env.MINIO_PORT || 9000),
-            useSSL: process.env.NODE_ENV === 'dev' ? false : true,
-            accessKey: process.env.MINIO_ACCESS_KEY,
-            secretKey: process.env.MINIO_SECRET_KEY,
+            endPoint: this.config.get<string>('MINIO_URL_HOST', 'localhost'),
+            port: Number(this.config.get<string>('MINIO_PORT') || 9000),
+            useSSL: this.config.get<string>('NODE_ENV') !== 'dev',
+            accessKey: this.config.get<string>('MINIO_ACCESS_KEY'),
+            secretKey: this.config.get<string>('MINIO_SECRET_KEY'),
         });
     }
 

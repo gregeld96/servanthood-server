@@ -11,12 +11,17 @@ import { AccountModule } from "./modules/account/account.module";
 import { AccountController } from "./modules/account/account.controller";
 import { MediaFileController } from "libs/common/src/upload/mediafile.controller";
 import { MediaFileModule } from "libs/common/src/upload/mediafile.module";
+import { ConfigModule } from "@nestjs/config";
 
 @Module({
     imports: [
         JwtModule.register({
             global: true,
             secret: process.env.JWT_SECRET_PUBLIC,
+        }),
+        ConfigModule.forRoot({
+            isGlobal: true,
+            envFilePath: '.env', // default = root (process.cwd())
         }),
         CommonModule,
         PrismaModule,

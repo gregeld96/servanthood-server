@@ -15,12 +15,19 @@ import { LocationController } from "./modules/location/location.controller";
 import { SpeakerController } from "./modules/speaker/speaker.controller";
 import { SpeakerModule } from "./modules/speaker/speaker.module";
 import { LocationModule } from "./modules/location/location.module";
+import { MasterAccountModule } from "./modules/master-account/master-account.module";
+import { MasterAccountController } from "./modules/master-account/master-account.controller";
+import { ConfigModule } from "@nestjs/config";
 
 @Module({
     imports: [
         JwtModule.register({
             global: true,
             secret: process.env.JWT_SECRET_INTERNAL,
+        }),
+        ConfigModule.forRoot({
+            isGlobal: true,
+            envFilePath: '.env', // default = root (process.cwd())
         }),
         AuthenticationModule,
         CommonModule,
@@ -30,6 +37,7 @@ import { LocationModule } from "./modules/location/location.module";
         EventModule,
         SpeakerModule,
         LocationModule,
+        MasterAccountModule,
     ],
     providers: [
         PrismaService,
@@ -72,6 +80,7 @@ export class AppModule implements NestModule {
                 EventController,
                 LocationController,
                 SpeakerController,
+                MasterAccountController,
             )
     }
 }

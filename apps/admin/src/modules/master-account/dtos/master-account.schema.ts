@@ -95,12 +95,9 @@ const filterSchema = z.discriminatedUnion("operator", [
   }),
 ]);
 
-/** The final schema: an array of those filter objects */
-export const filtersSchema = z.array(filterSchema).min(1, "at least 1 filter");
 
 /** Type inference for TS */
 export type Filter = z.infer<typeof filterSchema>;
-export type Filters = z.infer<typeof filtersSchema>;
 
 // export const FormEventSchema = z.object({
 //     name: GenerateZodType.trimmedString('name'),
@@ -127,4 +124,5 @@ export const MasterAccountFilterSchema = FilterSchema(
 ).extend({
     filter: z.array(filterSchema)
 })
+
 export class GetAccountListDTO extends createZodDto(MasterAccountFilterSchema) { }
