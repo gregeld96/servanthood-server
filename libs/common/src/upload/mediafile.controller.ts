@@ -21,7 +21,7 @@ export class MediaFileController {
             file: file, 
             objectName: `${v7()}-${file.originalname.replace(/ /g, '-')}`, 
             userId: req.user?.userId, 
-            isInternal: body.isInternal, 
+            isInternal: body?.isInternal || false, 
         });
     }
 }

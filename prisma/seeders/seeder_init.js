@@ -115,10 +115,6 @@ async function main() {
             username: 'gregoriuseldwin',
         },
     });
-
-    console.log(res, 'Pass DB:', res.password, res.password.length, 'Hash:', hashingPassword, hashingPassword.length, 'Compare without package:', res.password === hashingPassword);
-
-    console.log(comparePassword(res.password, hashingPassword));
 }
 
 main()

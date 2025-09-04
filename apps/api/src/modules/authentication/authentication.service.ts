@@ -68,21 +68,22 @@ export class AuthenticationService {
 
             const publicId = v7();
 
-            const saltRounds = this.config.get<number>('SALT_KEY', 10);
+            const saltRounds = this.config.get<string>('SALT_KEY', "10");
+            const password = hashPassword(payload.password, saltRounds);
 
             const res = await this.prisma.account.create({
                 data: {
                     publicId: publicId,
                     email: payload.email,
                     name: payload.name,
-                    password: hashPassword(payload.password, saltRounds),
+                    password: password,
                     nickname: payload.nickname,
                     dob: payload.dob,
                     gender: payload.gender,
                     parishOrigin: payload.parishOrigin,
                     phoneNumber: payload.phoneNumber,
                     marital: payload.marital,
-                    marriedAt: payload.maritalDate,
+                    marriedAt: payload?.maritalDate || null,
                 }
             });
 
