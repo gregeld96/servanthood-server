@@ -67,6 +67,34 @@ export class EventService {
         }
     }
 
+    async getSeoEventSpecific(slug: string){
+        try {
+            const data = await this.prisma.event.findFirstOrThrow({
+                where: {
+                    slug,
+                },
+                select: {
+                    name: true,
+                    slug: true,
+                    description: true,
+                }
+            });
+    
+            return {
+                data,
+            }
+        } catch (error: any) {
+            switch (error.name) {
+                case ErrorName.PRISMA_NOT_FOUND:
+                    throw prismaNotFound();
+                case ErrorName.PRISMA_CLIENT_ERROR:
+                    throw prismaClientError(error);
+                default:
+                    throw internalServerError(error);
+            }
+        }
+    }
+
     async getEventSpecific(slug: string){
         try {
             const data = await this.prisma.event.findFirstOrThrow({
